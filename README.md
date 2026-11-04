@@ -1,106 +1,101 @@
-@echo off
-chcp 65001 >nul
-setlocal enabledelayedexpansion
-title 大肥鱼智能大屏 v1.2.5 - 发布介绍
-color 0E
-mode con cols=88 lines=40
+# 大肥鱼智能大屏 v1.2.5 发布说明
 
-set "SD=%~dp0"
-set "SD=%SD:~0,-1%"
-if exist "%SD%\index.html" (set "APP=%SD%") else if exist "%SD%\..\index.html" (set "APP=%SD%\..") else (set "APP=%SD%")
+> 发布版本：**v1.2.5**\
+> 发布日期：2026-11-04\
+> 安装包：`大肥鱼大屏_安装包_v1.2.5.exe`（6.39 MB）\
+> 适用平台：Windows 10 / 11（64 位）
 
-:head
-cls
-echo ================================================================
-echo                                                              
-echo        大大的鱼  ·  大肥鱼智能大屏   v1.2.5                  
-echo                                                              
-echo ================================================================
-echo.
-echo   【简介】
-echo   大肥鱼智能大屏是一套面向桌面的 AI 智能体大屏应用：
-echo   · 全屏可视化界面（WebView2），支持对话 / 语音 / 视频 / 日程
-echo   · 内置 QQ 机器人桥接，可与 QQ 好友 / 群聊实时互通
-echo   · 双语音引擎：Edge-TTS 极速联网语音 + ChatTTS 离线高音质
-echo   · 7 种预置离线音色，支持一键生成新音色（实验性）
-echo   · 全部数据本地存储，无需注册、不上传隐私
-echo.
-echo   【本版本 v1.2.5 更新内容】
-echo   + 新增 语音合成模块（设置 - 语音 页签）
-echo   + 双引擎架构：Edge-TTS（约 1 秒） / ChatTTS（离线 CPU）
-echo   + 8 个微软官方中文音色：晓晓 / 小艺 / 云健 / 云希 /
-echo     云夏 / 云扬 / 小北(东北话) / 小妮(陕西话)
-echo   + 7 个 ChatTTS 预置音色：大肥鱼 / 3 女声 / 2 男声 / 童声
-echo   + 修复 ChatTTS 句尾截断问题（末尾追加 0.5 秒静音）
-echo   + 修复音色列表加载与试听 422 报错
-echo   + 优化 Edge-TTS 缓存原子写入，避免并发读到半截音频
-echo   + 优化 Python / Node 路径自动探测，安装后即可运行
-echo   + 新增 keep_alive.js 守护进程（30 秒健康巡检）
-echo.
-echo   【快速开始】
-echo   1. 运行安装包完成安装（自动创建桌面快捷方式）
-echo   2. 双击桌面「大肥鱼智能大屏」启动主界面
-echo   3. 首次启用语音：打开「设置 - 语音」页签
-echo      · 选 Edge-TTS 引擎 → 点「试听」，约 1 秒出声
-echo      · 离线音色请先运行「完整流程.cmd」安装 ChatTTS 依赖
-echo   4. QQ 机器人：在 qqbot 目录运行 bridge.cmd 并按提示扫码登录
-echo.
-echo   【服务与端口】
-echo   Bridge    127.0.0.1:18902   QQ 机器人桥接 / 语音代理
-echo   ChatTTS   127.0.0.1:18903   离线语音合成（CPU）
-echo   Edge-TTS  127.0.0.1:18904   极速联网语音合成
-echo   Gateway   127.0.0.1:18899   AI 模型网关
-echo.
-echo   【运行环境】
-echo   Windows 10/11 (64 位) · WebView2 运行时
-echo   语音功能需要 Python 3.10+；Edge-TTS 需联网，
-echo   ChatTTS 完全离线但 CPU 推理较慢（约 30-60 秒/句）
-echo.
-echo   【使用说明】
-echo   · 完整流程.cmd —— 环境检查 / 安装依赖 / 启停服务 / 状态查询
-echo   · 本文件        —— 版本说明与功能介绍
-echo.
-echo ================================================================
-echo   [1] 查看服务状态    [2] 启动全部服务    [3] 打开大屏
-echo   [4] 打开完整流程    [0] 退出
-echo ================================================================
-set /p "CH=请选择: "
-if "%CH%"=="1" goto st
-if "%CH%"=="2" goto go
-if "%CH%"=="3" goto open
-if "%CH%"=="4" goto flow
-if "%CH%"=="0" exit /b 0
-goto head
+***
 
-:st
-echo.
-powershell -NoProfile -Command ^
-  "$u=@(@{n='Bridge';p=18902;q='/api/tts2/status'},@{n='Edge-TTS';p=18904;q='/health'},@{n='ChatTTS';p=18903;q='/health'});" ^
-  "foreach($x in $u){ try{$r=Invoke-WebRequest ('http://127.0.0.1:'+$x.p+$x.q) -TimeoutSec 3 -UseBasicParsing; Write-Host ('  ' + $x.n.PadRight(10) + $x.p + '  [OK] ' + $r.StatusCode) -ForegroundColor Green}catch{ Write-Host ('  ' + $x.n.PadRight(10) + $x.p + '  [未运行]') -ForegroundColor Red}}"
-echo.
-pause
-goto head
+## 一、简介
 
-:go
-if exist "%APP%\keep_alive.js" (
-  start "大肥鱼服务守护" cmd /c "node ""%APP%\keep_alive.js"" & pause"
-  echo 已在新窗口启动全部服务。
-) else (
-  echo [提示] 未找到 keep_alive.js，请使用「完整流程.cmd」操作。
-)
-timeout /t 3 >nul
-goto head
+大肥鱼智能大屏是一套面向桌面的 AI 智能体大屏应用：
 
-:open
-if exist "%APP%\大肥鱼大屏.exe" (start "" "%APP%\大肥鱼大屏.exe") else (start "" "%APP%\index.html")
-timeout /t 2 >nul
-goto head
+- **全屏可视化界面**（WebView2），支持对话、语音、视频、日程
+- **内置 QQ 机器人桥接**，可与 QQ 好友、群聊实时互通
+- **双语音引擎**：Edge-TTS 极速联网语音 + ChatTTS 离线高音质
+- **7 种预置离线音色**，支持一键生成新音色（实验性）
+- **数据全部本地存储**，无需注册，不上传隐私
 
-:flow
-if exist "%SD%\大肥鱼大屏_v1.2.5_完整流程.cmd" (
-  call "%SD%\大肥鱼大屏_v1.2.5_完整流程.cmd"
-) else (
-  echo [提示] 未找到「完整流程.cmd」。
-  pause
-)
-goto head
+***
+
+## 二、本版更新内容
+
+### 新增
+
+- 新增 **语音合成模块**（设置 → 语音 页签）
+- 新增 **双引擎架构**：Edge-TTS（约 1 秒）／ChatTTS（离线 CPU）
+- 新增 **8 个微软官方中文音色**
+  | 音色 | 角色 | 说明        |
+  | -- | -- | --------- |
+  | 晓晓 | 女声 | 温柔自然，通用推荐 |
+  | 小艺 | 女声 | 活泼灵动      |
+  | 云健 | 男声 | 沉稳有力      |
+  | 云希 | 男声 | 阳光青年      |
+  | 云夏 | 男声 | 少年感       |
+  | 云扬 | 男声 | 新闻播报腔     |
+  | 小北 | 女声 | 东北方言      |
+  | 小妮 | 女声 | 陕西方言      |
+- 新增 **7 个 ChatTTS 预置音色**：大肥鱼、3 种女声、2 种男声、1 种童声
+- 新增 `keep_alive.js` **守护进程**：每 30 秒健康巡检，异常自动拉起
+- 新增 **完整流程.cmd** 与 **发布介绍.cmd** 两个控制台脚本
+
+### 修复
+
+- 修复 ChatTTS **句尾截断**问题（音频末尾追加 0.5 秒静音）
+- 修复音色列表**加载失败**与试听返回 **422** 的接口错误
+- 修复守护脚本中 Node 路径含空格时**启动失败**的问题
+
+### 优化
+
+- Edge-TTS 缓存改为**临时文件 + 原子替换**，避免并发读到半截音频
+- Edge-TTS 增加空文本、超长文本（2000 字符）校验与空结果检测
+- Python / Node 路径改为**四级自动探测**：环境变量 → 自带运行时 → 开发环境 → 系统 PATH
+- 安装包体积与内容整理：语音脚本、预置音色、说明文档一并打包
+
+***
+
+## 三、安装与使用
+
+1. 运行 `大肥鱼大屏_安装包_v1.2.5.exe` 完成安装（自动创建桌面快捷方式）
+2. 双击桌面「大肥鱼智能大屏」启动主界面
+3. **首次启用语音**
+   - 打开「设置 → 语音」页签
+   - 选择 **Edge-TTS** 引擎，点击「试听」，约 1 秒出声
+   - 需要离线音色时，先运行「完整流程.cmd」选择 `[2] 安装语音依赖`，或 `[3] 安装离线语音` 安装 ChatTTS
+4. **QQ 机器人**：进入 `qqbot` 目录运行 `bridge.cmd`，按提示扫码登录
+
+> 语音功能需要 Python 3.10 及以上版本；Edge-TTS 需联网，ChatTTS 完全离线但 CPU 推理较慢（约 30–60 秒/句）。
+
+***
+
+## 四、服务端口
+
+| 服务       | 端口    | 用途              |
+| -------- | ----- | --------------- |
+| Bridge   | 18902 | QQ 机器人桥接 / 语音代理 |
+| ChatTTS  | 18903 | 离线语音合成（CPU）     |
+| Edge-TTS | 18904 | 极速联网语音合成        |
+| Gateway  | 18899 | AI 模型网关         |
+
+***
+
+## 五、附件说明
+
+| 文件                      | 说明                             |
+| ----------------------- | ------------------------------ |
+| `大肥鱼大屏_安装包_v1.2.5.exe`  | 主安装包                           |
+| `大肥鱼大屏_v1.2.5_完整流程.cmd` | 环境检查 / 依赖安装 / 启停服务 / 状态查询 / 构建 |
+| `大肥鱼大屏_v1.2.5_发布介绍.cmd` | 版本介绍与快捷入口                      |
+
+***
+
+## 六、升级提示
+
+- 安装包使用固定 AppId，覆盖安装会自动识别为同一程序原地升级
+- 升级前建议先通过「完整流程.cmd」的 `[6] 停止全部服务` 释放端口
+- 语音相关文件位于安装目录的 `tts` 文件夹，升级不会删除自定义音色缓存
+
+***
+
+*本版本聚焦于语音能力落地与稳定性修复，欢迎反馈使用体验。*
